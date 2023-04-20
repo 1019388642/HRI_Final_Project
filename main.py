@@ -26,13 +26,15 @@ def neckRegulator(motion_proxy):
 def rock(motion_proxy):
   #motion_proxy.angleInterpolationWithSpeed('LHand', 1.0, 0.5)
   motion_proxy.closeHand('LHand')
+  time.sleep(1)
 
 def paper(motion_proxy):
   motion_proxy.openHand('LHand')
+  time.sleep(1)
 
 def scissors(motion_proxy):
-  motion_proxy.setAngles(['LHand'], [0.47], 0.9)
-  time.sleep(0.3)
+  motion_proxy.setAngles(['LHand'], [0.6], 0.9)
+  time.sleep(1)
 
 def shakingArm(motion_proxy):
   for i in range(3):
@@ -67,31 +69,8 @@ def main():
   neckRegulator(motion_proxy)
   #shakingArm(motion_proxy)
   scissors(motion_proxy)
+  paper(motion_proxy)
   while(True):
-    '''  
-    img = proxy.getImageRemote(subscriber)
-    if img != None:
-  
-      width = img[0]
-      height = img[1]
-      layer = img[2]
-      array = img[6]
-      img_str = str(bytearray(array))
-      image = np.fromstring(img_str, np.uint8).reshape(height, width, layer)
-      gray_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-      resize_img = cv2.resize(gray_img, (800, 800))
-      num = ArUCOdetection(resize_img)
-      print(num)
-      if num == 3:
-        tts.say('Paper')
-        time.sleep(1)
-      elif num == 2:
-        tts.say('scissor')
-        time.sleep(1)
-      elif num == 1:
-        tts.say('Rock')
-        time.sleep(1)
-    '''
     num = arTagReco(proxy, subscriber)
 
     print(num)
