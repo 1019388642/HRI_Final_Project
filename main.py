@@ -1,7 +1,7 @@
 import cv2
 from cv2 import aruco
 from naoqi import ALProxy
-
+import random
 import numpy as np
 import time
 
@@ -26,9 +26,11 @@ def neckRegulator(motion_proxy):
 def rock(motion_proxy):
   #motion_proxy.angleInterpolationWithSpeed('LHand', 1.0, 0.5)
   motion_proxy.closeHand('LHand')
+  #motion_proxy.setAngles(['LHand'], [0.0], 0.9)
   time.sleep(1)
 
 def paper(motion_proxy):
+  #motion_proxy.setAngles(['LHand'], [1.0], 0.9)
   motion_proxy.openHand('LHand')
   time.sleep(1)
 
@@ -36,12 +38,32 @@ def scissors(motion_proxy):
   motion_proxy.setAngles(['LHand'], [0.6], 0.9)
   time.sleep(1)
 
-def shakingArm(motion_proxy):
+def shakingArm(motion_proxy, tts_proxy, rand_gest):
+  word = ['rock', 'paper', 'scissor']
   for i in range(3):
+    motion_proxy.angleInterpolationWithSpeed(['LHand'], [0.0], 0.9)
     motion_proxy.angleInterpolationWithSpeed('LShoulderPitch', -0.3, 0.3)
-    time.sleep(0.3)
+    tts_proxy.say(word[i])
+    time.sleep(0.2)
     motion_proxy.angleInterpolationWithSpeed('LShoulderPitch', 0.3, 0.3)
-    time.sleep(0.3)
+    time.sleep(0.2)
+  tts_proxy.say(rand_gest)
+  time.sleep(0.2)
+  if rand_gest == 'rock':
+    print('1')
+    motion_proxy.angleInterpolationWithSpeed('LShoulderPitch', -0.3, 0.3)
+    rock(motion_proxy)
+    time.sleep(2)
+  elif rand_gest == 'paper':
+    print('2')
+    motion_proxy.angleInterpolationWithSpeed('LShoulderPitch', -0.3, 0.3)
+    paper(motion_proxy)
+    time.sleep(2)
+  else:
+    print('3')
+    motion_proxy.angleInterpolationWithSpeed('LShoulderPitch', 0.3, 0.3)
+    scissors(motion_proxy)
+    time.sleep(2)
 
 def arTagReco(videoProxy, subscriber):
   img = videoProxy.getImageRemote(subscriber)
@@ -63,17 +85,41 @@ def arTagReco(videoProxy, subscriber):
 def main():
   proxy = ALProxy("ALVideoDevice", Nao_ip, Nao_port)
   tts = ALProxy("ALTextToSpeech", Nao_ip, Nao_port)
-
+  mem = ALProxy('ALMemory', Nao_ip, Nao_port)
+  asr = ALProxy('ALSpeechRecognition', Nao_ip, Nao_port)
+  touch = ALProxy('ALTouch', Nao_ip, Nao_port)
+  #asr.setLanguage('English')
+  #vocabulary = ['yes', 'no', 'ok']
+  #asr.pause(True)
+  #asr.setParameter('Sensitivity', 1)
+  #asr.setParameter('NbHypotheses', 2)
+  #asr.setVocabulary(vocabulary, True)
+  #asr.pause(False)
+  #asr.get
+  #asr.subscribe('Test_ASR')
+  #asr.setAudioExpression(True)
+  #print(asr.getParameter('Sensitivity'))
+  #print(asr.getAudioExpression())
+  #time.sleep(20)
   subscriber = proxy.subscribeCamera("demo", 0, 3, 13, 1)
   motion_proxy = ALProxy('ALMotion', Nao_ip, Nao_port)
   neckRegulator(motion_proxy)
-  #shakingArm(motion_proxy)
   scissors(motion_proxy)
   paper(motion_proxy)
   while(True):
-    num = arTagReco(proxy, subscriber)
+    time.sleep(0.1)
+    #num = arTagReco(proxy, subscriber)
+    #shakingArm(motion_proxy, tts, rand_gesture)
+    trigger = (touch.getStatus()[0][1])
+    if trigger == True:
+      print('yes')
+      tts.say("OK! Let's play!")
+      time.sleep(0.5)
+      rand_gesture = random.choice(['rock', 'paper', 'scissor'])
+      shakingArm(motion_proxy, tts, rand_gesture)
+      num = arTagReco(proxy, subscriber)
 
-    print(num)
+
 
 main()
 
