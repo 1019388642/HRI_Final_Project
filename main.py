@@ -24,15 +24,12 @@ def neckRegulator(motion_proxy):
   motion_proxy.angleInterpolationWithSpeed('Head', [0., 0.], 0.2)#[1., 1.], isAbsolute=True)
 
 def rock(motion_proxy):
-  #motion_proxy.angleInterpolationWithSpeed('LHand', 1.0, 0.5)
   start = time.time()
   while (time.time() - start < 3):
     motion_proxy.closeHand('LHand')
-  #motion_proxy.setAngles(['LHand'], [0.0], 0.9)
   time.sleep(1)
 
 def paper(motion_proxy):
-  #motion_proxy.setAngles(['LHand'], [1.0], 0.9)
   start = time.time()
   while (time.time() - start < 3):
     motion_proxy.openHand('LHand')
@@ -119,16 +116,19 @@ def main():
   subscriber = proxy.subscribeCamera("demo", 0, 3, 13, 1)
   motion_proxy = ALProxy('ALMotion', Nao_ip, Nao_port)
   neckRegulator(motion_proxy)
-
+  start_time = time.time()
   while(True):
     time.sleep(0.1)
     trigger = (touch.getStatus()[0][1])
+    if time.time() - start_time > 10:
+      tts.say("Do you want to play a game? Then know my head!")
+      start_time = time.time()
     if trigger == True:
       print('yes')
       tts.say("OK! Let's play!")
       time.sleep(0.5)
-      rand_gesture = random.choice(['rock', 'paper','scissor'])
-      time
+      rand_gesture = random.choice(['rock', 'paper', 'scissor'])
+
       shakingArm(motion_proxy, tts, rand_gesture)
 
       num = arTagReco(proxy, subscriber)
